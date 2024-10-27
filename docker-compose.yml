@@ -1,0 +1,34 @@
+services:
+  mysql-go-admin:
+    image: mysql:5.7
+    environment:
+      - DATABASE={$DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    ports:
+      - "9314:3306"
+    networks:
+      - go-admin-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "-u${DB_USER}", "-p${DB_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+#  go-admin:
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile
+#    ports:
+#      - 3333:8080
+#    env_file:
+#      - ./.env
+#    networks:
+#      - go-admin-network
+#    depends_on:
+#      mysql-go-admin:
+#        condition: service_healthy
+
+networks:
+  go-admin-network:
+    driver: bridge
