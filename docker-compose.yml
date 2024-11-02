@@ -2,11 +2,12 @@ services:
   mysql-go-admin:
     image: mysql:5.7
     environment:
-      - DATABASE={$DATABASE}
+      - DB_USER=${DB_USER}
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_PASSWORD}
       - MYSQL_DATABASE=${DB_NAME}
     ports:
-      - "9314:3306"
+      - "3319:3306"
     networks:
       - go-admin-network
     healthcheck:
