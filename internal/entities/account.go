@@ -47,6 +47,10 @@ func (a *Account) validateToCreate() error {
 		errs = append(errs, "field: Name is required")
 	}
 
+	if len(a.AccountType) > 2 {
+		errs = append(errs, "field: accountType accepted only two character")
+	}
+
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, "\n"))
 	}

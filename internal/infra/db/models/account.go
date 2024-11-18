@@ -15,7 +15,7 @@ type AccountModel struct {
 	Document       string         `gorm:"type:varchar(100);not null"`
 	AccountType    string         `gorm:"type:char(2)"`
 	Active         bool           `gorm:"not null"`
-	AddressID      uuid.UUID      `gorm:"type:char(36)"`
+	AddressID      uuid.UUID      `gorm:"type:char(36);default null"`
 	Address        AddressModel   `gorm:"foreignKey:AddressID"`
 	Users          []UserModel    `gorm:"foreignKey:AccountID"`
 	Sellers        []SellerModel  `gorm:"foreignKey:AccountID"`

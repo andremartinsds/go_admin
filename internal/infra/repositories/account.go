@@ -9,7 +9,6 @@ import (
 	"github.com/andremartinsds/go_admin/internal/infra/db/models"
 	"github.com/andremartinsds/go_admin/internal/mappers"
 	"github.com/andremartinsds/go_admin/pkg"
-	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
 
@@ -25,13 +24,13 @@ type AccountRepository struct {
 	db *gorm.DB
 }
 
-func AccountRepositoryInstancy(connection *gorm.DB) *AccountRepository {
+func AccountRepositoryInstance(connection *gorm.DB) *AccountRepository {
 	return &AccountRepository{db: connection}
 }
 
 func (a *AccountRepository) List() (*[]entities.Account, error) {
 	var accountsModel []models.AccountModel
-	err := a.db.Preload("Endereco").Find(&accountsModel).Error
+	err := a.db.Preload("Address").Find(&accountsModel).Error
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +45,8 @@ func (a *AccountRepository) List() (*[]entities.Account, error) {
 
 func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 	if (entities.Address{}) != *account.Address {
-		a.db.Transaction(func(tx *gorm.DB) error {
+		a.db.Debug()
+		err := a.db.Transaction(func(tx *gorm.DB) error {
 			if err := tx.Save(&models.AddressModel{
 				ID:                 account.Address.ID,
 				ZipCode:            account.Address.ZipCode,
@@ -57,6 +57,7 @@ func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 				Complement:         account.Address.Complement,
 				Neighborhood:       account.Address.Neighborhood,
 				ReferencePoint:     account.Address.ReferencePoint,
+				CreatedAt:          account.Address.CreatedAt,
 				Observation:        account.Address.Observation,
 				UpdatedAt:          time.Now(),
 			}).Error; err != nil {
@@ -69,6 +70,7 @@ func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 				Document:       account.Document,
 				Active:         *account.Active,
 				AccountType:    account.AccountType,
+				CreatedAt:      account.CreatedAt,
 				UpdatedAt:      time.Now(),
 				AddressID:      account.Address.ID,
 			}).Error; err != nil {
@@ -76,14 +78,17 @@ func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 			}
 			return nil
 		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func (a *AccountRepository) SelectOneById(id string) (*entities.Account, error) {
 	var account models.AccountModel
-	a.db.Preload("Endereco").First(&account, "id = ?", id)
-	if lo.IsEmpty(&account) {
+	a.db.Preload("Address").First(&account, "id=?", id)
+	if account.Document == "" {
 		return nil, errors.New("account does not found")
 	}
 	accountEntity := mappers.ToAccountEntity(account)
@@ -105,10 +110,11 @@ func (a *AccountRepository) ExistsByField(param map[string]string) (bool, error)
 }
 
 func (a *AccountRepository) Create(account *entities.Account) error {
-	enderecoID := pkg.NewUUID()
-	a.db.Transaction(func(tx *gorm.DB) error {
+	var addressID = pkg.NewUUID()
+	a.db.Debug()
+	err := a.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&models.AddressModel{
-			ID:                 enderecoID,
+			ID:                 addressID,
 			ZipCode:            account.Address.ZipCode,
 			State:              account.Address.State,
 			City:               account.Address.City,
@@ -131,11 +137,14 @@ func (a *AccountRepository) Create(account *entities.Account) error {
 			AccountType:    account.AccountType,
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
-			AddressID:      enderecoID,
+			AddressID:      addressID,
 		}).Error; err != nil {
 			return err
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 	return nil
 }

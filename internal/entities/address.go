@@ -3,6 +3,7 @@ package entities
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/andremartinsds/go_admin/internal/dto"
 	"github.com/andremartinsds/go_admin/pkg"
@@ -39,6 +40,12 @@ type Address struct {
 
 	// Observation contains any additional notes about the address.
 	Observation string
+
+	// CreatedAt is the timestamp when the account was created.
+	CreatedAt time.Time
+
+	// UpdatedAt is the timestamp when the account was last updated.
+	UpdatedAt time.Time
 }
 
 // Validate checks if the address fields are valid.
@@ -48,6 +55,9 @@ func (e *Address) Validate() error {
 
 	if e.ZipCode == "" {
 		messages = append(messages, "address.zipCode is required")
+	}
+	if len(e.ZipCode) > 8 {
+		messages = append(messages, "address.zipCode is too long")
 	}
 	if e.State == "" {
 		messages = append(messages, "address.state is required")
@@ -92,13 +102,20 @@ func NewAddress(addressDto dto.AddressInputCreateDTO) (error, *Address) {
 		ReferencePoint: addressDto.ReferencePoint,
 		Observation:    addressDto.Observation,
 	}
-
+	address.clearZipCode()
 	err := address.Validate()
 	if err != nil {
 		return err, nil
 	}
 
 	return nil, &address
+}
+
+func (a *Address) clearZipCode() {
+	a.ZipCode = strings.ReplaceAll(a.ZipCode, "-", "")
+	a.ZipCode = strings.ReplaceAll(a.ZipCode, ".", "")
+	a.ZipCode = strings.ReplaceAll(a.ZipCode, "/", "")
+	a.ZipCode = strings.ReplaceAll(a.ZipCode, "_", "")
 }
 
 // UpdateAddress updates an existing Address with the provided AddressInputUpdateDTO.
@@ -116,6 +133,11 @@ func UpdateAddress(addressDto dto.AddressInputUpdateDTO) (error, *Address) {
 		Neighborhood:   addressDto.Neighborhood,
 		ReferencePoint: addressDto.ReferencePoint,
 		Observation:    addressDto.Observation,
+	}
+	address.clearZipCode()
+	err := address.Validate()
+	if err != nil {
+		return err, nil
 	}
 
 	return nil, &address

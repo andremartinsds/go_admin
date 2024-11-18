@@ -3,7 +3,7 @@ package controllers
 import (
 	contactHandler "github.com/andremartinsds/go_admin/internal/handlers/contacts"
 	"github.com/andremartinsds/go_admin/internal/infra/repositories"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type ManagerController struct {
@@ -18,7 +18,7 @@ func RegisterManagerController(controller *ControllerBase) {
 }
 
 func (managerController *ManagerController) Routes() {
-	managerController.Controller.C.Route("/manager", func(r chi.Router) {
+	managerController.Controller.Mux.Route("/manager", func(r chi.Router) {
 		// contact repository instance
 		contactRepository := repositories.ContactRepositoryInstancy(managerController.Controller.DB)
 		// contact instance

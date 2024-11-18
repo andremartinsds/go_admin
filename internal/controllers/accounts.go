@@ -3,7 +3,7 @@ package controllers
 import (
 	accountHandler "github.com/andremartinsds/go_admin/internal/handlers/account"
 	"github.com/andremartinsds/go_admin/internal/infra/repositories"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type AccountController struct {
@@ -18,12 +18,15 @@ func RegisterAccountController(controller *ControllerBase) {
 }
 
 func (accountController *AccountController) Routes() {
-	accountController.Controller.C.Route("/accounts", func(r chi.Router) {
-		accountRepository := repositories.AccountRepositoryInstancy(accountController.Controller.DB)
-		h := accountHandler.AccountHandlerInstancy(accountRepository)
+	accountRepository := repositories.AccountRepositoryInstance(accountController.Controller.DB)
+	h := accountHandler.AccountHandlerInstancy(accountRepository)
+
+	accountController.Controller.Mux.Route("/accounts", func(r chi.Router) {
+		r.Route("/{accountId}", func(r chi.Router) {
+			r.Get("/", h.SelectAccount)
+			r.Put("/", h.UpdateAccount)
+		})
 		r.Post("/", h.CreateAccount)
 		r.Get("/", h.List)
-		r.Get("/{accountId}", h.SelectAccount)
-		r.Put("/{accountId}", h.UpdateAccount)
 	})
 }

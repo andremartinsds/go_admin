@@ -9,7 +9,7 @@ import (
 	"github.com/andremartinsds/go_admin/internal/mappers"
 	"github.com/samber/lo"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/andremartinsds/go_admin/internal/dto"
 
@@ -17,12 +17,16 @@ import (
 )
 
 type UserHandler struct {
-	repository repositories.UserContract
+	userRepository    repositories.UserContract
+	accountRepository repositories.AccountContract
+	sellerRepository  repositories.SellerContract
 }
 
-func UserHandlerInstance(contract repositories.UserContract) *UserHandler {
+func UserHandlerInstance(userRepository repositories.UserContract, accountRepository repositories.AccountContract, sellerRepository repositories.SellerContract) *UserHandler {
 	return &UserHandler{
-		repository: contract,
+		userRepository:    userRepository,
+		accountRepository: accountRepository,
+		sellerRepository:  sellerRepository,
 	}
 }
 
@@ -39,7 +43,25 @@ func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	err = a.repository.UserExists(map[string]string{"email": userInputDto.Email})
+	accountEntity, _ := a.accountRepository.SelectOneById(userInputDto.AccountID)
+	if lo.IsEmpty(accountEntity.Document) {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "account does not found"})
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		return
+	}
+	sellerEntity, _ := a.sellerRepository.SelectOneById(userInputDto.SellerID)
+	if lo.IsEmpty(sellerEntity.Document) {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "seller does not found"})
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		return
+	}
+	err = a.userRepository.UserExists(map[string]string{"email": userInputDto.Email})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "user already exists"})
@@ -57,7 +79,7 @@ func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.repository.Create(user)
+	err = a.userRepository.Create(user)
 	if err != nil {
 		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: err.Error()})
 		if err != nil {
@@ -74,7 +96,7 @@ func (a *UserHandler) SelectUser(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "userId")
 	w.Header().Set("Content-type", "application/json")
 
-	user, err := a.repository.SelectOneById(userId)
+	user, err := a.userRepository.SelectOneById(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		err := json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "user not found"})
@@ -92,7 +114,7 @@ func (a *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	userId := chi.URLParam(r, "userId")
 
-	userFound, err := a.repository.SelectOneById(userId)
+	userFound, err := a.userRepository.SelectOneById(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return

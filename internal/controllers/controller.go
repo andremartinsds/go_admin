@@ -1,14 +1,14 @@
 package controllers
 
 import (
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	"sync"
 )
 
 type ControllerBase struct {
-	DB *gorm.DB
-	C  chi.Router
+	DB  *gorm.DB
+	Mux *chi.Mux
 }
 
 var (
@@ -16,17 +16,18 @@ var (
 	c    *ControllerBase
 )
 
-func Initialize(db *gorm.DB, route chi.Router) {
+func Initialize(db *gorm.DB, mux *chi.Mux) {
 	once.Do(func() {
 		c = &ControllerBase{
-			DB: db,
-			C:  route,
+			DB:  db,
+			Mux: mux,
 		}
 	})
 	registerControllers()
 }
 
 func registerControllers() {
+	RegisterLoginController(c)
 	RegisterSellerController(c)
 	RegisterAccountController(c)
 	RegisterManagerController(c)

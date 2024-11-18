@@ -24,6 +24,7 @@ type User struct {
 	CreatedAt   time.Time // Timestamp for when the user was created
 	UpdatedAt   time.Time // Timestamp for when the user was last updated
 	Address     *Address  // Pointer to the user's address
+	Claims      *Claims   //Pointer to the user's claims
 }
 
 // validateToCreate checks the User fields for required values before creation.
@@ -72,7 +73,7 @@ func (a *User) ValidatePassword(userDto dto.UserInputCreateDTO) error {
 // CreateUser initializes a new User based on the provided input DTO.
 func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 	// Create a new address entity from the input DTO
-	err, enderecoEntity := NewAddress(userInputDTO.Address)
+	err, addressEntity := NewAddress(userInputDTO.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +88,12 @@ func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 		Name:      userInputDTO.Name,
 		Phone:     userInputDTO.Phone,
 		Email:     userInputDTO.Email,
+		Document:  userInputDTO.Document,
 		Provider:  &userInputDTO.Provider,
 		Password:  userInputDTO.Password,
 		SellerID:  SellerID,
 		AccountID: accountID,
-		Address:   enderecoEntity,
+		Address:   addressEntity,
 	}
 
 	// Validate the user before creation

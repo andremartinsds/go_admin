@@ -6,6 +6,7 @@ import (
 	"github.com/andremartinsds/go_admin/internal/infra/db/models"
 	"github.com/andremartinsds/go_admin/internal/mappers"
 	"github.com/andremartinsds/go_admin/pkg"
+	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -13,12 +14,23 @@ import (
 type SellerContract interface {
 	Create(seller *entities.Seller) error
 	Exists(param map[string]string) (bool, error)
+	SelectOneById(id string) (*entities.Seller, error)
 	Update(seller *entities.Seller) error
 	Select(param map[string]string) (*entities.Seller, error)
 }
 
 type SellerRepository struct {
 	db *gorm.DB
+}
+
+func (a *SellerRepository) SelectOneById(id string) (*entities.Seller, error) {
+	var seller models.SellerModel
+	a.db.Preload("Endereco").First(&seller, "id = ?", id)
+	if lo.IsEmpty(&seller) {
+		return nil, errors.New("seller does not found")
+	}
+	sellerEntity := mappers.SellerModelToEntity(&seller)
+	return sellerEntity, nil
 }
 
 func SellerRepositoryInstancy(connection *gorm.DB) *SellerRepository {

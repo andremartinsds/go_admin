@@ -3,7 +3,7 @@ package controllers
 import (
 	userHandler "github.com/andremartinsds/go_admin/internal/handlers/user"
 	"github.com/andremartinsds/go_admin/internal/infra/repositories"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type UserController struct {
@@ -17,10 +17,12 @@ func RegisterUserController(controller *ControllerBase) {
 	userController.Routes()
 }
 
-func (userController *UserController) Routes() {
-	userController.Controller.C.Route("/users", func(r chi.Router) {
-		userRepository := repositories.UserRepositoryInstancy(userController.Controller.DB)
-		accountHandler := userHandler.UserHandlerInstance(userRepository)
+func (controller *UserController) Routes() {
+	controller.Controller.Mux.Route("/users", func(r chi.Router) {
+		userRepository := repositories.UserRepositoryInstancy(controller.Controller.DB)
+		accountRepository := repositories.AccountRepositoryInstance(controller.Controller.DB)
+		sellerRepository := repositories.SellerRepositoryInstancy(controller.Controller.DB)
+		accountHandler := userHandler.UserHandlerInstance(userRepository, accountRepository, sellerRepository)
 		r.Post("/", accountHandler.CreateUser)
 		// r.Get("/", accountHandler.List)
 		r.Get("/{userId}", accountHandler.SelectUser)

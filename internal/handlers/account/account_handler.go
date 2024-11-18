@@ -7,7 +7,7 @@ import (
 	"github.com/andremartinsds/go_admin/internal/infra/repositories"
 	"github.com/andremartinsds/go_admin/internal/mappers"
 	"github.com/andremartinsds/go_admin/pkg"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/samber/lo"
 	"net/http"
 )
@@ -103,6 +103,8 @@ func (a *AccountHandler) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	account, err := entities.UpdateAccount(accountUpdateDto)
+	account.CreatedAt = accountFound.CreatedAt
+	account.Address.CreatedAt = accountFound.Address.CreatedAt
 	if err != nil {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
@@ -110,7 +112,7 @@ func (a *AccountHandler) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 
 	err = a.repository.UpdateOne(account)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
 

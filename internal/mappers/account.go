@@ -48,6 +48,8 @@ func ToAccountEntity(account models.AccountModel) *entities.Account {
 			Neighborhood:   account.Address.Neighborhood,
 			ReferencePoint: account.Address.ReferencePoint,
 			Observation:    account.Address.Observation,
+			CreatedAt:      account.Address.CreatedAt,
+			UpdatedAt:      account.Address.UpdatedAt,
 		}
 	}
 

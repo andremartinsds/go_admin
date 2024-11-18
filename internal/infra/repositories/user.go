@@ -16,6 +16,7 @@ type UserContract interface {
 	Create(account *entities.User) error
 	UserExists(param map[string]string) error
 	SelectOneById(id string) (*entities.User, error)
+	Login(username, password string) (*entities.User, error)
 }
 
 type UserRepository struct {
@@ -26,23 +27,26 @@ func UserRepositoryInstancy(connection *gorm.DB) *UserRepository {
 	return &UserRepository{db: connection}
 }
 
+func (u *UserRepository) Login(username, password string) (*entities.User, error) {
+	var userModel models.UserModel
+	err := u.db.Where("username = ?", username).Where("password =?", password).First(&userModel)
+	if err != nil {
+		return nil, errors.New("the username " + username + " or password " + password + " are incorrect")
+	}
+	return mappers.FromUserModelToUserEntity(&userModel), nil
+}
+
 func (u *UserRepository) UserExists(param map[string]string) error {
 	parameter, value, err := pkg.GetKeyValueFromMap(param)
 	if err != nil {
 		return err
 	}
-	var userModel models.UserModel
-	if err = u.db.First(&userModel, parameter+" ?", value).Error; err != nil {
-		return err
+	var userModel *models.UserModel
+	u.db.Debug()
+	u.db.First(&userModel, parameter+"=?", value)
+	if lo.IsNotEmpty(userModel.Email) {
+		return errors.New("the user already exists")
 	}
-	if err != nil {
-		return err
-	}
-
-	if lo.IsEmpty(&userModel) {
-		return errors.New("the user does not exists")
-	}
-
 	return nil
 }
 

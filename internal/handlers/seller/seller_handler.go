@@ -5,7 +5,7 @@ import (
 	"github.com/andremartinsds/go_admin/internal/entities"
 	"github.com/andremartinsds/go_admin/internal/mappers"
 	"github.com/andremartinsds/go_admin/pkg"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 
 	"github.com/andremartinsds/go_admin/internal/dto"

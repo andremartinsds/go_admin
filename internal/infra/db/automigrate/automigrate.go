@@ -6,7 +6,9 @@ import (
 )
 
 func AutoMigrate(db *gorm.DB) error {
-	err := db.AutoMigrate(models.AccountModel{}, models.SellerModel{}, models.ContactModel{}, models.AddressModel{}, models.SellerModel{}, models.UserModel{})
+	err := db.AutoMigrate(models.AddressModel{}, models.AccountModel{}, models.SellerModel{}, models.ContactModel{},
+		models.SellerModel{}, models.UserModel{}, models.RolesModel{}, models.ClaimsModel{},
+		models.UserClaimModel{}, models.RoleClaimsModel{}, models.OpenRoutes{})
 	if err != nil {
 		return err
 	}

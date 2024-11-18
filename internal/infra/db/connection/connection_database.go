@@ -6,8 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var DataSource *gorm.DB
+
 func DatabaseStart() (*gorm.DB, error) {
 	db, err := configs.ConnectDatabase()
+
 	if err != nil {
 		return nil, err
 	}
@@ -15,5 +18,6 @@ func DatabaseStart() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	DataSource = db
 	return db, nil
 }
