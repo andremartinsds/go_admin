@@ -17,19 +17,34 @@ type SellerContract interface {
 	SelectOneById(id string) (*entities.Seller, error)
 	Update(seller *entities.Seller) error
 	Select(param map[string]string) (*entities.Seller, error)
+	List(accountID string) ([]*entities.Seller, error)
 }
 
 type SellerRepository struct {
 	db *gorm.DB
 }
 
-func (a *SellerRepository) SelectOneById(id string) (*entities.Seller, error) {
+func (s *SellerRepository) SelectOneById(id string) (*entities.Seller, error) {
 	var seller models.SellerModel
-	a.db.Preload("Endereco").First(&seller, "id = ?", id)
+	s.db.Preload("Endereco").First(&seller, "id = ?", id)
 	if lo.IsEmpty(&seller) {
 		return nil, errors.New("seller does not found")
 	}
 	sellerEntity := mappers.SellerModelToEntity(&seller)
+	return sellerEntity, nil
+}
+
+func (s *SellerRepository) List(accountID string) ([]*entities.Seller, error) {
+	var sellers []models.SellerModel
+	err := s.db.Preload("Address").Preload("Account").Preload("Account.Address").Find(&sellers).Where("account_id = ?", accountID).Error
+	if err != nil || len(sellers) == 0 {
+		return nil, errors.New("does not exist seller to this account")
+	}
+	var sellerEntity []*entities.Seller
+	for _, seller := range sellers {
+		s := mappers.SellerModelToEntity(&seller)
+		sellerEntity = append(sellerEntity, s)
+	}
 	return sellerEntity, nil
 }
 
@@ -40,15 +55,14 @@ func SellerRepositoryInstancy(connection *gorm.DB) *SellerRepository {
 func (s *SellerRepository) Select(param map[string]string) (*entities.Seller, error) {
 	key, value, _ := pkg.GetKeyValueFromMap(param)
 	var sellerModel models.SellerModel
-	if err := s.db.Preload("Endereco").Preload("Account").Preload("Account.Endereco").First(&sellerModel, key+" = ?", value).Error; err != nil {
+	if err := s.db.Preload("Address").Preload("Account").Preload("Account.Address").First(&sellerModel, key+"=?", value).Error; err != nil {
 		return nil, err
 	}
 	return mappers.SellerModelToEntity(&sellerModel), nil
 }
 
 func (s *SellerRepository) Update(seller *entities.Seller) error {
-	sellerModel := mappers.SellerEntityToSellerModel(seller)
-	if err := s.db.Save(sellerModel).Error; err != nil {
+	if err := s.db.Save(mappers.SellerEntityToSellerModel(seller)).Error; err != nil {
 		return err
 	}
 	return nil

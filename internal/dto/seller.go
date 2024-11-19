@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 // SellerInputCreateDTO represents the data transfer object used to create a new seller.
 // It includes the necessary information to create a seller record.
 type SellerInputCreateDTO struct {
@@ -42,6 +44,8 @@ type SellerInputUpdateDTO struct {
 
 	// Active indicates whether the seller is currently active.
 	Active bool `json:"active"`
+
+	CreatedAt time.Time
 
 	// Address contains the details of the seller's address to be updated.
 	Address AddressInputUpdateDTO `json:"address"`

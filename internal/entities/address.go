@@ -132,6 +132,8 @@ func UpdateAddress(addressDto dto.AddressInputUpdateDTO) (error, *Address) {
 		Complement:     addressDto.Complement,
 		Neighborhood:   addressDto.Neighborhood,
 		ReferencePoint: addressDto.ReferencePoint,
+		CreatedAt:      addressDto.CreatedAt,
+		UpdatedAt:      time.Now(),
 		Observation:    addressDto.Observation,
 	}
 	address.clearZipCode()

@@ -126,7 +126,7 @@ func (a *AccountHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch the list of accounts from the repository
 	accounts, err := a.repository.List()
-	if err != nil {
+	if err != nil || len(*accounts) == 0 {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "accounts not found", StatusCode: http.StatusNotFound})
 		return
 	}

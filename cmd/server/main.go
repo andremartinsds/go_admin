@@ -38,6 +38,14 @@ func main() {
 
 	controllers.Initialize(db, r)
 
+	err = chi.Walk(r, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		fmt.Printf("[%s]: '%s' has %d middlewares\n", method, route, len(middlewares))
+		return nil
+	})
+	if err != nil {
+		return
+	}
+
 	err = http.ListenAndServe(fmt.Sprintf(":%s", viper.GetString("APP_PORT")), r)
 	if err != nil {
 		panic(err)

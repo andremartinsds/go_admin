@@ -86,6 +86,7 @@ func (sellerHandler *Handler) UpdateSeller(w http.ResponseWriter, r *http.Reques
 	// Decode request body into Seller update DTO.
 	var sellerInputUpdateDTO dto.SellerInputUpdateDTO
 	err := json.NewDecoder(r.Body).Decode(&sellerInputUpdateDTO)
+	sellerInputUpdateDTO.ID = sellerID
 	if err != nil {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "Invalid input data", StatusCode: http.StatusBadRequest})
 		return
@@ -99,14 +100,16 @@ func (sellerHandler *Handler) UpdateSeller(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if seller exists by ID.
-	sellerExists, _ := sellerHandler.sellerRepository.Exists(map[string]string{"id": sellerID})
-	if !sellerExists {
+	sellerFound, err := sellerHandler.sellerRepository.Select(map[string]string{"id": sellerID})
+	if err != nil || sellerFound == nil {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "The seller does not exist", StatusCode: http.StatusBadRequest})
 		return
 	}
 
 	// Update seller entity.
-	seller, err := entities.NewSellerToUpdate(sellerInputUpdateDTO)
+	sellerInputUpdateDTO.CreatedAt = sellerFound.CreatedAt
+	sellerInputUpdateDTO.Address.CreatedAt = sellerFound.Address.CreatedAt
+	seller, err := entities.SellerUpdate(sellerInputUpdateDTO)
 	if err != nil {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
@@ -142,12 +145,23 @@ func (sellerHandler *Handler) SelectSeller(w http.ResponseWriter, r *http.Reques
 
 // ListSeller handles the listing of all sellers.
 func (sellerHandler *Handler) ListSeller(w http.ResponseWriter, r *http.Request) {
-	// Placeholder for listing functionality.
-	pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "Not implemented", StatusCode: http.StatusNotImplemented})
+	accountID := chi.URLParam(r, "accountID")
+	if accountID == "" {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "the accountID is required", StatusCode: http.StatusBadRequest})
+		return
+	}
+
+	sellers, err := sellerHandler.sellerRepository.List(accountID)
+	if err != nil || len(sellers) == 0 {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "does not exist sellers to this account", StatusCode: http.StatusNotImplemented})
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(sellers)
 }
 
 // DesactiveSeller handles the deactivation of a seller by their ID.
 func (sellerHandler *Handler) DesactiveSeller(w http.ResponseWriter, r *http.Request) {
-	// Placeholder for deactivation functionality.
+
 	pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "Not implemented", StatusCode: http.StatusNotImplemented})
 }

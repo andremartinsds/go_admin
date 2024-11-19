@@ -76,7 +76,7 @@ func NewSeller(sellerDto dto.SellerInputCreateDTO) (*Seller, error) {
 
 // NewSellerToUpdate creates or updates an existing Seller entity from the provided SellerInputUpdateDTO.
 // Returns a pointer to the updated Seller and an error if any validations fail.
-func NewSellerToUpdate(sellerDto dto.SellerInputUpdateDTO) (*Seller, error) {
+func SellerUpdate(sellerDto dto.SellerInputUpdateDTO) (*Seller, error) {
 	err, address := UpdateAddress(sellerDto.Address)
 	if err != nil {
 		return nil, err
@@ -91,6 +91,8 @@ func NewSellerToUpdate(sellerDto dto.SellerInputUpdateDTO) (*Seller, error) {
 		LegalName: sellerDto.CorporateName,
 		Document:  sellerDto.Document,
 		Active:    &sellerDto.Active,
+		CreatedAt: sellerDto.CreatedAt,
+		UpdatedAt: time.Now(),
 		Address:   address,
 	}
 

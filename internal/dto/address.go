@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 // AddressInputCreateDTO represents the data transfer object used to create a new address.
 // It includes detailed information about the address that needs to be created.
 type AddressInputCreateDTO struct {
@@ -66,6 +68,8 @@ type AddressInputUpdateDTO struct {
 
 	// ReferencePoint is a landmark or reference point near the address.
 	ReferencePoint string `json:"referencePoint"`
+
+	CreatedAt time.Time
 
 	// Observation contains any additional observations or notes regarding the address.
 	Observation string `json:"observation"`

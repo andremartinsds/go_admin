@@ -87,6 +87,7 @@ func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 
 func (a *AccountRepository) SelectOneById(id string) (*entities.Account, error) {
 	var account models.AccountModel
+	a.db.Debug()
 	a.db.Preload("Address").First(&account, "id=?", id)
 	if account.Document == "" {
 		return nil, errors.New("account does not found")
@@ -130,6 +131,7 @@ func (a *AccountRepository) Create(account *entities.Account) error {
 			return err
 		}
 		if err := tx.Save(&models.AccountModel{
+			ID:             account.ID,
 			NickName:       account.NickName,
 			CommercialName: account.CommercialName,
 			Document:       account.Document,
