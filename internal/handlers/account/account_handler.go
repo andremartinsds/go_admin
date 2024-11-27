@@ -36,7 +36,7 @@ func (a *AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the account already exists
-	exists, _ := a.repository.ExistsByField(map[string]string{"document": accountDto.Document})
+	exists, _ := a.repository.ExistsBy(map[string]string{"document": accountDto.Document})
 	if exists {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "account already exists", StatusCode: http.StatusBadRequest})
 		return
@@ -62,7 +62,7 @@ func (a *AccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 // SelectAccount retrieves an account by its ID.
 func (a *AccountHandler) SelectAccount(w http.ResponseWriter, r *http.Request) {
-	accountId := chi.URLParam(r, "accountId")
+	accountId := chi.URLParam(r, "accountID")
 	pkg.DefaultHeaders(w)
 
 	// Fetch the account from the repository
@@ -143,4 +143,24 @@ func (a *AccountHandler) List(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusNotFound})
 	}
+}
+
+func (a *AccountHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	accountID := chi.URLParam(r, "accountID")
+	if accountID == "" {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "account id required", StatusCode: http.StatusBadRequest})
+		return
+	}
+	accountEntity, err := a.repository.SelectOneById(accountID)
+	if accountEntity == nil || err != nil {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "account not found", StatusCode: http.StatusNotFound})
+		return
+	}
+
+	err = a.repository.DeleteById(accountEntity)
+	if err != nil {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

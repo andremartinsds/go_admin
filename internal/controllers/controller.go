@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/andremartinsds/go_admin/internal/mod"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	"sync"
@@ -23,6 +24,7 @@ func Initialize(db *gorm.DB, mux *chi.Mux) {
 			Mux: mux,
 		}
 	})
+	mod.Mux = mux
 	registerControllers()
 }
 

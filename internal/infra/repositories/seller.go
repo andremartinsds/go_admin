@@ -18,10 +18,19 @@ type SellerContract interface {
 	Update(seller *entities.Seller) error
 	Select(param map[string]string) (*entities.Seller, error)
 	List(accountID string) ([]*entities.Seller, error)
+	DeleteById(id string) error
 }
 
 type SellerRepository struct {
 	db *gorm.DB
+}
+
+func (s *SellerRepository) DeleteById(id string) error {
+	err := s.db.Delete(&entities.Seller{}, id)
+	if err != nil {
+		return errors.New("seller delete error")
+	}
+	return nil
 }
 
 func (s *SellerRepository) SelectOneById(id string) (*entities.Seller, error) {

@@ -18,7 +18,7 @@ type AccountRepositoryStub struct {
 func (a *AccountRepositoryStub) Create(account *entities.Account) error {
 	return a.ErrorFnCreate
 }
-func (a *AccountRepositoryStub) ExistsByField(param map[string]string) (bool, error) {
+func (a *AccountRepositoryStub) ExistsBy(param map[string]string) (bool, error) {
 	return a.Condition, a.ErrorFnExists
 }
 func (a *AccountRepositoryStub) SelectOneById(id string) (*entities.Account, error) {

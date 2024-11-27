@@ -46,7 +46,7 @@ func (sellerHandler *Handler) CreateSeller(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if account exists.
-	accountExists, _ := sellerHandler.accountRepository.ExistsByField(map[string]string{"id": sellerDto.AccountID})
+	accountExists, _ := sellerHandler.accountRepository.ExistsBy(map[string]string{"id": sellerDto.AccountID})
 	if !accountExists {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "The account does not exist", StatusCode: http.StatusBadRequest})
 		return
@@ -93,7 +93,7 @@ func (sellerHandler *Handler) UpdateSeller(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Check if account exists.
-	accountExists, _ := sellerHandler.accountRepository.ExistsByField(map[string]string{"id": sellerInputUpdateDTO.AccountID})
+	accountExists, _ := sellerHandler.accountRepository.ExistsBy(map[string]string{"id": sellerInputUpdateDTO.AccountID})
 	if !accountExists {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "The account does not exist", StatusCode: http.StatusBadRequest})
 		return
@@ -161,7 +161,28 @@ func (sellerHandler *Handler) ListSeller(w http.ResponseWriter, r *http.Request)
 }
 
 // DesactiveSeller handles the deactivation of a seller by their ID.
-func (sellerHandler *Handler) DesactiveSeller(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) DesactiveSeller(w http.ResponseWriter, r *http.Request) {
 
-	pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "Not implemented", StatusCode: http.StatusNotImplemented})
+	sellerID := chi.URLParam(r, "sellerID")
+	if sellerID == "" {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "the sellerID is required", StatusCode: http.StatusBadRequest})
+		return
+	}
+	accountID := chi.URLParam(r, "accountID")
+	if accountID == "" {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "the accountID is required", StatusCode: http.StatusBadRequest})
+		return
+	}
+	seller, err := s.sellerRepository.Select(map[string]string{"id": sellerID})
+	if err != nil || seller == nil {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		return
+	}
+
+	err = s.sellerRepository.DeleteById(sellerID)
+	if err != nil {
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusInternalServerError})
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

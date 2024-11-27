@@ -22,9 +22,10 @@ func (accountController *AccountController) Routes() {
 	h := accountHandler.AccountHandlerInstancy(accountRepository)
 
 	accountController.Controller.Mux.Route("/accounts", func(r chi.Router) {
-		r.Get("/{accountId}", h.SelectAccount)
-		r.Put("/{accountId}", h.UpdateAccount)
+		r.Get("/{accountID}", h.SelectAccount)
+		r.Put("/{accountID}", h.UpdateAccount)
 		r.Post("/", h.CreateAccount)
 		r.Get("/", h.List)
+		r.Delete("/{accountID}", h.Delete)
 	})
 }

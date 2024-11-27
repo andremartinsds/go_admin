@@ -14,10 +14,11 @@ import (
 
 type AccountContract interface {
 	Create(account *entities.Account) error
-	ExistsByField(param map[string]string) (bool, error)
+	ExistsBy(param map[string]string) (bool, error)
 	SelectOneById(id string) (*entities.Account, error)
 	UpdateOne(account *entities.Account) error
 	List() (*[]entities.Account, error)
+	DeleteById(account *entities.Account) error
 }
 
 type AccountRepository struct {
@@ -28,24 +29,31 @@ func AccountRepositoryInstance(connection *gorm.DB) *AccountRepository {
 	return &AccountRepository{db: connection}
 }
 
-func (a *AccountRepository) List() (*[]entities.Account, error) {
-	var accountsModel []models.AccountModel
-	err := a.db.Preload("Address").Find(&accountsModel).Error
-	if err != nil {
-		return nil, err
+func (a *AccountRepository) DeleteById(account *entities.Account) error {
+	accountModel := mappers.ToAccountModel(account)
+	if account.Address.ZipCode != "" {
+		err := a.db.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Delete(&accountModel).Error; err != nil {
+				return err
+			}
+			if err := tx.Delete(&accountModel.Address).Error; err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return errors.New(fmt.Sprintf("delete account error: %s", err))
+		}
+		return nil
 	}
-	var accounts []entities.Account
-	for _, account := range accountsModel {
-		accountsEntity := mappers.ToAccountEntity(account)
-		accounts = append(accounts, *accountsEntity)
+	if err := a.db.Delete(&accountModel).Error; err != nil {
+		return errors.New(fmt.Sprintf("delete account error: %s", err))
 	}
-
-	return &accounts, nil
+	return nil
 }
 
 func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 	if (entities.Address{}) != *account.Address {
-		a.db.Debug()
 		err := a.db.Transaction(func(tx *gorm.DB) error {
 			if err := tx.Save(&models.AddressModel{
 				ID:                 account.Address.ID,
@@ -85,6 +93,21 @@ func (a *AccountRepository) UpdateOne(account *entities.Account) error {
 	return nil
 }
 
+func (a *AccountRepository) List() (*[]entities.Account, error) {
+	var accountsModel []models.AccountModel
+	err := a.db.Preload("Address").Find(&accountsModel).Error
+	if err != nil {
+		return nil, err
+	}
+	var accounts []entities.Account
+	for _, account := range accountsModel {
+		accountsEntity := mappers.ToAccountEntity(account)
+		accounts = append(accounts, *accountsEntity)
+	}
+
+	return &accounts, nil
+}
+
 func (a *AccountRepository) SelectOneById(id string) (*entities.Account, error) {
 	var account models.AccountModel
 	a.db.Debug()
@@ -96,7 +119,7 @@ func (a *AccountRepository) SelectOneById(id string) (*entities.Account, error) 
 	return accountEntity, nil
 }
 
-func (a *AccountRepository) ExistsByField(param map[string]string) (bool, error) {
+func (a *AccountRepository) ExistsBy(param map[string]string) (bool, error) {
 	var account models.AccountModel
 	parameter, value, err := pkg.GetKeyValueFromMap(param)
 	if err != nil {

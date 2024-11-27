@@ -65,3 +65,34 @@ func ToAccountEntity(account models.AccountModel) *entities.Account {
 		Address:        address,
 	}
 }
+
+func ToAccountModel(account *entities.Account) *models.AccountModel {
+	address := &models.AddressModel{}
+	if account.Address.ZipCode != "" {
+		address.ID = account.Address.ID
+		address.ZipCode = account.Address.ZipCode
+		address.State = account.Address.State
+		address.City = account.Address.City
+		address.AddressDescription = account.Address.Description
+		address.Neighborhood = account.Address.Neighborhood
+		address.Number = account.Address.Number
+		address.Complement = account.Address.Complement
+		address.ReferencePoint = account.Address.ReferencePoint
+		address.Observation = account.Address.Observation
+		address.CreatedAt = account.Address.CreatedAt
+		address.UpdatedAt = account.Address.UpdatedAt
+	}
+
+	return &models.AccountModel{
+		ID:             account.ID,
+		NickName:       account.NickName,
+		CommercialName: account.CommercialName,
+		Document:       account.Document,
+		AccountType:    account.AccountType,
+		Active:         *account.Active,
+		AddressID:      address.ID,
+		Address:        *address,
+		CreatedAt:      account.CreatedAt,
+		UpdatedAt:      account.UpdatedAt,
+	}
+}
