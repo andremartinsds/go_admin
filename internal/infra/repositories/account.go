@@ -125,7 +125,6 @@ func (a *AccountRepository) ExistsBy(param map[string]string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("map error")
 	}
-	fmt.Println(parameter + " ?")
 	a.db.Preload("Address").First(&account, parameter+"= ?", value)
 	if account.Document == "" {
 		return false, fmt.Errorf("user does not found for %s and %s", parameter, value)

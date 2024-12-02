@@ -18,7 +18,7 @@ func RegisterSellerController(controller *ControllerBase) {
 }
 
 func (s *SellerController) Routes() {
-	sellerRepository := repositories.SellerRepositoryInstancy(s.Controller.DB)
+	sellerRepository := repositories.SellerRepositoryInstance(s.Controller.DB)
 	accountRepository := repositories.AccountRepositoryInstance(s.Controller.DB)
 	h := sellerHandler.Instance(sellerRepository, accountRepository)
 	s.Controller.Mux.Route("/sellers", func(r chi.Router) {

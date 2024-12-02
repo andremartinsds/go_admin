@@ -80,7 +80,7 @@ func (a *AccountHandler) SelectAccount(w http.ResponseWriter, r *http.Request) {
 // UpdateAccount modifies an existing account.
 func (a *AccountHandler) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	pkg.DefaultHeaders(w)
-	accountId := chi.URLParam(r, "accountId")
+	accountId := chi.URLParam(r, "accountID")
 
 	// Check if the account exists
 	accountFound, err := a.repository.SelectOneById(accountId)

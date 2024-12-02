@@ -21,7 +21,7 @@ func (controller *UserController) Routes() {
 	controller.Controller.Mux.Route("/users", func(r chi.Router) {
 		userRepository := repositories.UserRepositoryInstancy(controller.Controller.DB)
 		accountRepository := repositories.AccountRepositoryInstance(controller.Controller.DB)
-		sellerRepository := repositories.SellerRepositoryInstancy(controller.Controller.DB)
+		sellerRepository := repositories.SellerRepositoryInstance(controller.Controller.DB)
 		accountHandler := userHandler.UserHandlerInstance(userRepository, accountRepository, sellerRepository)
 		r.Post("/", accountHandler.CreateUser)
 		// r.Get("/", accountHandler.List)

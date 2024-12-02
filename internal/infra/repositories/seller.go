@@ -18,24 +18,43 @@ type SellerContract interface {
 	Update(seller *entities.Seller) error
 	Select(param map[string]string) (*entities.Seller, error)
 	List(accountID string) ([]*entities.Seller, error)
-	DeleteById(id string) error
+	DeleteById(seller entities.Seller) error
 }
 
 type SellerRepository struct {
 	db *gorm.DB
 }
 
-func (s *SellerRepository) DeleteById(id string) error {
-	err := s.db.Delete(&entities.Seller{}, id)
-	if err != nil {
-		return errors.New("seller delete error")
+func SellerRepositoryInstance(connection *gorm.DB) *SellerRepository {
+	return &SellerRepository{db: connection}
+}
+
+func (s *SellerRepository) DeleteById(seller entities.Seller) error {
+	sellerModel := mappers.SellerEntityToSellerModel(&seller)
+	if seller.Address.ZipCode != "" {
+		err := s.db.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Delete(&sellerModel).Error; err != nil {
+				return err
+			}
+			if err := tx.Delete(&sellerModel.Address).Error; err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	if err := s.db.Delete(&sellerModel).Error; err != nil {
+		return errors.New("failed to delete seller from db")
 	}
 	return nil
 }
 
 func (s *SellerRepository) SelectOneById(id string) (*entities.Seller, error) {
 	var seller models.SellerModel
-	s.db.Preload("Endereco").First(&seller, "id = ?", id)
+	s.db.Preload("Address").First(&seller, "id = ?", id)
 	if lo.IsEmpty(&seller) {
 		return nil, errors.New("seller does not found")
 	}
@@ -55,10 +74,6 @@ func (s *SellerRepository) List(accountID string) ([]*entities.Seller, error) {
 		sellerEntity = append(sellerEntity, s)
 	}
 	return sellerEntity, nil
-}
-
-func SellerRepositoryInstancy(connection *gorm.DB) *SellerRepository {
-	return &SellerRepository{db: connection}
 }
 
 func (s *SellerRepository) Select(param map[string]string) (*entities.Seller, error) {
@@ -87,11 +102,11 @@ func (s *SellerRepository) Exists(param map[string]string) (bool, error) {
 	return true, nil
 }
 
-func (a *SellerRepository) Create(seller *entities.Seller) error {
-	enderecoID := pkg.NewUUID()
-	err := a.db.Transaction(func(tx *gorm.DB) error {
+func (s *SellerRepository) Create(seller *entities.Seller) error {
+	addressID := pkg.NewUUID()
+	err := s.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&models.AddressModel{
-			ID:                 enderecoID,
+			ID:                 addressID,
 			ZipCode:            seller.Address.ZipCode,
 			State:              seller.Address.State,
 			City:               seller.Address.City,
@@ -115,7 +130,7 @@ func (a *SellerRepository) Create(seller *entities.Seller) error {
 			CreatedAt:     time.Now(),
 			UpdatedAt:     time.Now(),
 			AccountID:     seller.AccountID,
-			AddressID:     enderecoID,
+			AddressID:     addressID,
 		}).Error; err != nil {
 			return err
 		}

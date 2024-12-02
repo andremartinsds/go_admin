@@ -109,9 +109,10 @@ func (sellerHandler *Handler) UpdateSeller(w http.ResponseWriter, r *http.Reques
 	// Update seller entity.
 	sellerInputUpdateDTO.CreatedAt = sellerFound.CreatedAt
 	sellerInputUpdateDTO.Address.CreatedAt = sellerFound.Address.CreatedAt
+	sellerInputUpdateDTO.Address.ID = sellerFound.Address.ID.String()
 	seller, err := entities.SellerUpdate(sellerInputUpdateDTO)
 	if err != nil {
-		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "try again, something wrong", StatusCode: http.StatusBadRequest})
 		return
 	}
 
@@ -168,18 +169,18 @@ func (s *Handler) DesactiveSeller(w http.ResponseWriter, r *http.Request) {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "the sellerID is required", StatusCode: http.StatusBadRequest})
 		return
 	}
-	accountID := chi.URLParam(r, "accountID")
+	accountID := r.Header.Get("accountID")
 	if accountID == "" {
-		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "the accountID is required", StatusCode: http.StatusBadRequest})
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "the accountID header is required", StatusCode: http.StatusBadRequest})
 		return
 	}
 	seller, err := s.sellerRepository.Select(map[string]string{"id": sellerID})
 	if err != nil || seller == nil {
-		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: "seller not found", StatusCode: http.StatusBadRequest})
 		return
 	}
 
-	err = s.sellerRepository.DeleteById(sellerID)
+	err = s.sellerRepository.DeleteById(*seller)
 	if err != nil {
 		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusInternalServerError})
 		return
