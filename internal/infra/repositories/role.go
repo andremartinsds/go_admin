@@ -16,13 +16,13 @@ type RoleRepository struct {
 	db *gorm.DB
 }
 
-func RoleRepositoryInstancy(connection *gorm.DB) *RoleRepository {
+func RoleRepositoryInstance(connection *gorm.DB) *RoleRepository {
 	return &RoleRepository{db: connection}
 }
 
 func (r *RoleRepository) CreateDefaultsRoles(role *entities.Role) error {
-	sellerID, _ := pkg.ParseID(role.SellerID)
-	accountID, _ := pkg.ParseID(role.AccountID)
+	sellerID, _ := pkg.StringToUUID(role.SellerID)
+	accountID, _ := pkg.StringToUUID(role.AccountID)
 
 	if err := r.db.Create(&models.RolesModel{
 		ID:          pkg.NewUUID(),

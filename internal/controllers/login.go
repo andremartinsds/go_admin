@@ -20,7 +20,7 @@ func RegisterLoginController(controller *ControllerBase) {
 func (c *LoginController) Routes() {
 	c.Controller.Mux.Route("/login", func(r chi.Router) {
 		userRepository := repositories.UserRepositoryInstancy(c.Controller.DB)
-		h := loginHandler.LoginHandlerInstancy(userRepository)
+		h := loginHandler.LoginHandlerInstance(userRepository)
 		r.Post("/", h.Login)
 	})
 }

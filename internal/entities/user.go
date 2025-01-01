@@ -79,8 +79,8 @@ func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 	}
 
 	// Parse SellerID and AccountID from strings to IDs
-	SellerID, _ := pkg.ParseID(userInputDTO.SellerID)
-	accountID, _ := pkg.ParseID(userInputDTO.AccountID)
+	SellerID, _ := pkg.StringToUUID(userInputDTO.SellerID)
+	accountID, _ := pkg.StringToUUID(userInputDTO.AccountID)
 
 	// Initialize a new User instance
 	user := User{

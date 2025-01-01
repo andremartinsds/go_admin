@@ -6,18 +6,18 @@ import (
 	"net/http"
 )
 
-type StandardError struct {
-	W          http.ResponseWriter
-	Message    string
-	StatusCode int
+type InternalError struct {
+	ResponseWriter http.ResponseWriter
+	Message        string
+	StatusCode     int
 }
 
-func StandardErrorResponse(standardError StandardError) {
-	standardError.W.WriteHeader(standardError.StatusCode)
-	err := json.NewEncoder(standardError.W).Encode(errs.HttpResponse{ErrorCode: standardError.StatusCode,
-		Message: standardError.Message})
+func ErrorResponse(standardError InternalError) {
+	standardError.ResponseWriter.WriteHeader(standardError.StatusCode)
+	err := json.NewEncoder(standardError.ResponseWriter).Encode(
+		errs.HttpResponse{ErrorCode: standardError.StatusCode, Message: standardError.Message})
 	if err != nil {
-		standardError.W.WriteHeader(standardError.StatusCode)
+		standardError.ResponseWriter.WriteHeader(standardError.StatusCode)
 	}
 	return
 }

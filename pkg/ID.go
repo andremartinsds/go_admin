@@ -9,10 +9,14 @@ type ID = uuid.UUID
 func NewUUID() ID {
 	return ID(uuid.New())
 }
-func ParseID(s string) (ID, error) {
+func StringToUUID(s string) (ID, error) {
 	id, err := uuid.Parse(s)
 	return ID(id), err
 }
-func StrID(id ID) string {
+func UUIDToString(id ID) string {
 	return id.String()
+}
+
+func ValidUUID(s string) bool {
+	return len(s) == SizeGuid
 }

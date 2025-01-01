@@ -24,19 +24,19 @@ type Seller struct {
 
 // ValidateFieldsToCreate checks the required fields for creating a seller.
 // Returns an error if any required field is missing.
-func (seller Seller) ValidateFieldsToCreate() error {
+func (s Seller) ValidateFieldsToCreate() error {
 	message := []string{}
 
-	if seller.Document == "" {
+	if s.Document == "" {
 		message = append(message, "seller.document is required")
 	}
-	if seller.NickName == "" {
+	if s.NickName == "" {
 		message = append(message, "seller.nickname is required")
 	}
-	if seller.LegalName == "" {
+	if s.LegalName == "" {
 		message = append(message, "seller.legalName is required")
 	}
-	if seller.Active == nil {
+	if s.Active == nil {
 		message = append(message, "seller.active is required")
 	}
 	if len(message) > 0 {
@@ -54,7 +54,7 @@ func NewSeller(sellerDto dto.SellerInputCreateDTO) (*Seller, error) {
 		return nil, err
 	}
 
-	accountID, _ := pkg.ParseID(sellerDto.AccountID)
+	accountID, _ := pkg.StringToUUID(sellerDto.AccountID)
 
 	sellerEntity := Seller{
 		ID:        pkg.NewUUID(),
@@ -74,6 +74,10 @@ func NewSeller(sellerDto dto.SellerInputCreateDTO) (*Seller, error) {
 	return &sellerEntity, nil
 }
 
+func (s *Seller) IsAccountIDEqual(accountID string) bool {
+	return pkg.UUIDToString(s.AccountID) == accountID
+}
+
 // NewSellerToUpdate creates or updates an existing Seller entity from the provided SellerInputUpdateDTO.
 // Returns a pointer to the updated Seller and an error if any validations fail.
 func SellerUpdate(sellerDto dto.SellerInputUpdateDTO) (*Seller, error) {
@@ -82,8 +86,8 @@ func SellerUpdate(sellerDto dto.SellerInputUpdateDTO) (*Seller, error) {
 		return nil, err
 	}
 
-	accountID, _ := pkg.ParseID(sellerDto.AccountID)
-	sellerID, _ := pkg.ParseID(sellerDto.ID)
+	accountID, _ := pkg.StringToUUID(sellerDto.AccountID)
+	sellerID, _ := pkg.StringToUUID(sellerDto.ID)
 	sellerEntity := Seller{
 		ID:        sellerID,
 		AccountID: accountID,

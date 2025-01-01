@@ -91,7 +91,7 @@ func UpdateAccount(accountUpdateDto dto.AccountInputUpdateDTO) (*Account, error)
 	if err != nil {
 		return nil, err
 	}
-	accountID, _ := pkg.ParseID(accountUpdateDto.Id)
+	accountID, _ := pkg.StringToUUID(accountUpdateDto.Id)
 	account := Account{
 		ID:             accountID,
 		NickName:       accountUpdateDto.Name,

@@ -121,7 +121,7 @@ func (a *Address) clearZipCode() {
 // UpdateAddress updates an existing Address with the provided AddressInputUpdateDTO.
 // It returns the updated Address and an error if the update fails.
 func UpdateAddress(addressDto dto.AddressInputUpdateDTO) (error, *Address) {
-	addressID, _ := pkg.ParseID(addressDto.ID)
+	addressID, _ := pkg.StringToUUID(addressDto.ID)
 	address := Address{
 		ID:             addressID,
 		ZipCode:        addressDto.ZipCode,

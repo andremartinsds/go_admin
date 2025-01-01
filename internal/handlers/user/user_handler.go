@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/andremartinsds/go_admin/internal/entities"
+	"github.com/andremartinsds/go_admin/pkg"
 	"net/http"
 
 	"github.com/andremartinsds/go_admin/internal/errs"
@@ -36,59 +37,50 @@ func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userInputDto dto.UserInputCreateDTO
 	err := json.NewDecoder(r.Body).Decode(&userInputDto)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "decoder with error", StatusCode: http.StatusBadRequest})
 		return
 	}
+
+	userInputDto.AccountID = r.Header.Get("accountID")
+	userInputDto.SellerID = r.Header.Get("sellerID")
+
+	if !pkg.ValidUUID(userInputDto.AccountID) || !pkg.ValidUUID(userInputDto.SellerID) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "the account or seller invalid", StatusCode: http.StatusBadRequest})
+		return
+	}
+
 	accountEntity, _ := a.accountRepository.SelectOneById(userInputDto.AccountID)
 	if lo.IsEmpty(accountEntity.Document) {
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "account does not found"})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "account does not found", StatusCode: http.StatusNotFound})
 		return
 	}
 	sellerEntity, _ := a.sellerRepository.SelectOneById(userInputDto.SellerID)
 	if lo.IsEmpty(sellerEntity.Document) {
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "seller does not found"})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "seller does not found", StatusCode: http.StatusNotFound})
+		return
+	}
+
+	if !sellerEntity.IsAccountIDEqual(userInputDto.AccountID) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "account or seller does not valid", StatusCode: http.StatusNotFound})
 		return
 	}
 	err = a.userRepository.UserExists(map[string]string{"email": userInputDto.Email})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: "user already exists"})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "user already exists", StatusCode: http.StatusNotFound})
 		return
 	}
 	user, err := entities.CreateUser(userInputDto)
 	if err != nil {
-		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
 
 	err = a.userRepository.Create(user)
 	if err != nil {
-		err = json.NewEncoder(w).Encode(errs.HttpResponse{ErrorCode: http.StatusBadRequest, Message: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-		}
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-
 	json.NewEncoder(w).Encode(mappers.FromUserToUserOutputCreateDTO(user))
 }
 

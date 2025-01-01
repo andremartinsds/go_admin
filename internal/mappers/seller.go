@@ -92,7 +92,7 @@ func SellerEntityToSellerOutputDTO(seller entities.Seller) dto.SellerOutputDto {
 	}
 
 	return dto.SellerOutputDto{
-		ID:       pkg.StrID(seller.ID),
+		ID:       pkg.UUIDToString(seller.ID),
 		Nickname: seller.NickName,
 		Document: seller.Document,
 		Address:  &address,

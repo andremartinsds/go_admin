@@ -14,7 +14,7 @@ type LoginHandler struct {
 }
 
 // LoginHandlerInstancy creates a new instance of LoginHandler with the provided contract.
-func LoginHandlerInstancy(userRepository repositories.UserContract) *LoginHandler {
+func LoginHandlerInstance(userRepository repositories.UserContract) *LoginHandler {
 	return &LoginHandler{
 		repository: userRepository,
 	}
@@ -23,6 +23,15 @@ func LoginHandlerInstancy(userRepository repositories.UserContract) *LoginHandle
 // Login handles.
 func (a *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	pkg.DefaultHeaders(w)
+
+	accountID := r.Header.Get("accountID")
+	sellerID := r.Header.Get("sellerID")
+
+	if !pkg.ValidUUID(accountID) || (sellerID != "" && !pkg.ValidUUID(sellerID)) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "unauthorized", StatusCode: http.StatusUnauthorized})
+		return
+	}
+
 	JwtAuth, _ := auth.JWT(r)
 	var inputDTO struct {
 		username string
@@ -30,12 +39,12 @@ func (a *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	err := json.NewDecoder(r.Body).Decode(&inputDTO)
 	if err != nil {
-		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
 	userEntity, err := a.repository.Login(inputDTO.username, inputDTO.password)
 	if err != nil {
-		pkg.StandardErrorResponse(pkg.StandardError{W: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
 	_, tokenString, _ := JwtAuth.Encode(map[string]interface{}{

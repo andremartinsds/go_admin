@@ -26,6 +26,6 @@ func (s *SellerController) Routes() {
 		r.Get("/account/{accountID}/seller/{sellerID}", h.SelectSeller)
 		r.Get("/account/{accountID}", h.ListSeller)
 		r.Put("/{sellerID}", h.UpdateSeller)
-		r.Delete("/{sellerID}", h.DesactiveSeller)
+		r.Delete("/{sellerID}", h.Inactive)
 	})
 }
