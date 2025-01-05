@@ -51,9 +51,9 @@ type SellerInputUpdateDTO struct {
 	Address AddressInputUpdateDTO `json:"address"`
 }
 
-// SellerOutputDto represents the data transfer object used to output seller information.
+// SellerOutputDTO represents the data transfer object used to output seller information.
 // It includes details about the seller being returned in responses.
-type SellerOutputDto struct {
+type SellerOutputDTO struct {
 	// ID is the unique identifier of the seller.
 	ID string `json:"id"`
 

@@ -188,8 +188,13 @@ func (sellerHandler *Handler) ListSeller(w http.ResponseWriter, r *http.Request)
 		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "does not exist sellers to this account", StatusCode: http.StatusNotImplemented})
 		return
 	}
+
+	var sellerOutputDTO []dto.SellerOutputDTO
+	for _, s := range sellers {
+		sellerOutputDTO = append(sellerOutputDTO, mappers.SellerEntityToSellerOutputDTO(*s))
+	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(sellers)
+	json.NewEncoder(w).Encode(sellerOutputDTO)
 }
 
 // Inactive the seller with seller ID.

@@ -74,7 +74,7 @@ func SellerEntityToSellerModel(s *entities.Seller) *models.SellerModel {
 	}
 }
 
-func SellerEntityToSellerOutputDTO(seller entities.Seller) dto.SellerOutputDto {
+func SellerEntityToSellerOutputDTO(seller entities.Seller) dto.SellerOutputDTO {
 	var address dto.AddressOutputDTO
 	if !pkg.IsEmptyUUID(seller.Address.ID) {
 		address = dto.AddressOutputDTO{
@@ -91,7 +91,7 @@ func SellerEntityToSellerOutputDTO(seller entities.Seller) dto.SellerOutputDto {
 		}
 	}
 
-	return dto.SellerOutputDto{
+	return dto.SellerOutputDTO{
 		ID:       pkg.UUIDToString(seller.ID),
 		Nickname: seller.NickName,
 		Document: seller.Document,
