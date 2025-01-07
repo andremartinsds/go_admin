@@ -3,6 +3,7 @@ package dummy
 import (
 	"github.com/andremartinsds/go_admin/internal/dto"
 	"github.com/andremartinsds/go_admin/pkg"
+	"github.com/andremartinsds/go_admin/test/mock"
 )
 
 func CreateInputSellerDTODummy() *dto.SellerInputCreateDTO {
@@ -12,6 +13,6 @@ func CreateInputSellerDTODummy() *dto.SellerInputCreateDTO {
 		CorporateName: "Razao Social",
 		Document:      "11111111111",
 		Active:        true,
-		Address:       *CreateAddressDTODummy(),
+		Address:       mock.CreateAddressInputDTOMock(),
 	}
 }

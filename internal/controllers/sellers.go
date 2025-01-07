@@ -23,9 +23,9 @@ func (s *SellerController) Routes() {
 	h := sellerHandler.Instance(sellerRepository, accountRepository)
 	s.Controller.Mux.Route("/sellers", func(r chi.Router) {
 		r.Post("/", h.CreateSeller)
-		r.Get("/account/{accountID}/seller/{sellerID}", h.SelectSeller)
-		r.Get("/", h.ListSeller)
-		r.Put("/{sellerID}", h.UpdateSeller)
+		r.Get("/select", h.SelectSeller)
+		r.Get("/list", h.ListSeller)
+		r.Put("/", h.UpdateSeller)
 		r.Delete("/{sellerID}", h.Inactive)
 	})
 }

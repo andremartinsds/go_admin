@@ -12,6 +12,7 @@ type AccountRepositoryStub struct {
 	Condition                    bool
 	ErrorFnUpdateOne             error
 	ErrorFnList                  error
+	ErrorFnDeleteByID            error
 	AccounntEntityFnList         []entities.Account
 }
 
@@ -29,4 +30,7 @@ func (a *AccountRepositoryStub) UpdateOne(account *entities.Account) error {
 }
 func (a *AccountRepositoryStub) List() (*[]entities.Account, error) {
 	return &a.AccounntEntityFnList, a.ErrorFnList
+}
+func (a *AccountRepositoryStub) DeleteById(account *entities.Account) error {
+	return a.ErrorFnDeleteByID
 }

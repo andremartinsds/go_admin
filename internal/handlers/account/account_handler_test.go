@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/andremartinsds/go_admin/internal/entities"
-	"github.com/andremartinsds/go_admin/pkg/tt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/andremartinsds/go_admin/internal/entities"
+	"github.com/andremartinsds/go_admin/pkg/tt"
 
 	"github.com/andremartinsds/go_admin/internal/dto"
 
@@ -21,9 +22,14 @@ func TestCreateAccount(t *testing.T) {
 	t.Run("should create new account", func(t *testing.T) {
 		//Arange
 		accountHandlerInstance := AccountHandlerInstancy(&stub.AccountRepositoryStub{
-			ErrorFnCreate: nil,
-			ErrorFnExists: nil,
-			Condition:     false,
+			ErrorFnCreate:                nil,
+			ErrorFnExists:                nil,
+			Condition:                    false,
+			ErrorFnSelectOneById:         nil,
+			AccountEntityFnSelectOneById: *dummy.AccountEntitityDummy(),
+			ErrorFnUpdateOne:             nil,
+			ErrorFnList:                  nil,
+			AccounntEntityFnList:         nil,
 		})
 
 		createInputAccountDTO := dummy.CreateInputAccountDTODummy()
@@ -50,7 +56,7 @@ func TestCreateAccount(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to decode response body: %v", err)
 		}
-		tt.AssertTest(t, returnedAccount.Name, createInputAccountDTO.Name)
+		tt.AssertTest(t, returnedAccount.NickName, createInputAccountDTO.Name)
 		tt.AssertTest(t, returnedAccount.Document, createInputAccountDTO.Document)
 	})
 

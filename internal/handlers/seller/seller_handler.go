@@ -99,6 +99,7 @@ func (sellerHandler *Handler) UpdateSeller(w http.ResponseWriter, r *http.Reques
 	var sellerInputUpdateDTO dto.SellerInputUpdateDTO
 	err := json.NewDecoder(r.Body).Decode(&sellerInputUpdateDTO)
 	sellerInputUpdateDTO.ID = sellerID
+	sellerInputUpdateDTO.AccountID = accountID
 	if err != nil {
 		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "Invalid input data", StatusCode: http.StatusBadRequest})
 		return

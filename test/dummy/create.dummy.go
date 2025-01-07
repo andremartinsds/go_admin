@@ -1,6 +1,9 @@
 package dummy
 
-import "github.com/andremartinsds/go_admin/internal/dto"
+import (
+	"github.com/andremartinsds/go_admin/internal/dto"
+	"github.com/andremartinsds/go_admin/test/mock"
+)
 
 func CreateInputAccountDTODummy() *dto.AccountInputCreateDTO {
 	return &dto.AccountInputCreateDTO{
@@ -9,7 +12,7 @@ func CreateInputAccountDTODummy() *dto.AccountInputCreateDTO {
 		Document:       "11111111111",
 		Active:         true,
 		AccountType:    "PJ",
-		Address:        *CreateAddressDTODummy(),
+		Address:        mock.CreateAddressInputDTOMock(),
 	}
 }
 
@@ -20,6 +23,6 @@ func UpdateInputAccountDTODummy() *dto.AccountInputUpdateDTO {
 		Document:       "11111111111",
 		Active:         true,
 		AccountType:    "PJ",
-		Address:        *UpdateAddressDTODummy(),
+		Address:        mock.UpdateAddressInputDTOMock(),
 	}
 }
