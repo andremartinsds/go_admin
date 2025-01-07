@@ -3,12 +3,13 @@ package seller
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/andremartinsds/go_admin/pkg/tt"
-	"github.com/andremartinsds/go_admin/test/dummy"
-	"github.com/andremartinsds/go_admin/test/stub"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/andremartinsds/go_admin/pkg/tt"
+	"github.com/andremartinsds/go_admin/test/dummy"
+	"github.com/andremartinsds/go_admin/test/stub"
 )
 
 func TestSellerHandler_CreateSeller(t *testing.T) {
@@ -16,11 +17,21 @@ func TestSellerHandler_CreateSeller(t *testing.T) {
 		//Arrange
 		sellerInstance := Instance(
 			&stub.SellerRepositoryStub{
-				ErrorFnCreate: nil,
+				ErrorFnCreate:        nil,
+				ErrorFnExists:        nil,
+				ErrorFnUpdate:        nil,
+				ConditionFnExists:    false,
+				ErrorFnSelect:        nil,
+				ErrorFnDeleteByID:    nil,
+				ListSellerFn:         nil,
+				ErrorFnListSeller:    nil,
+				SelectOneByIDFN:      nil,
+				ErrorFnSelectOneByID: nil,
 			}, &stub.AccountRepositoryStub{
-				ErrorFnExists: nil,
-				ErrorFnCreate: nil,
-				Condition:     true,
+				ErrorFnExists:     nil,
+				ErrorFnCreate:     nil,
+				Condition:         true,
+				ErrorFnDeleteByID: nil,
 			})
 
 		sellerDto, err := json.Marshal(dummy.CreateInputSellerDTODummy())
