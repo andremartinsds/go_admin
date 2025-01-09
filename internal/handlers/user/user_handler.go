@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/andremartinsds/go_admin/internal/entities"
 	"github.com/andremartinsds/go_admin/pkg"
-	"net/http"
 
 	"github.com/andremartinsds/go_admin/internal/errs"
 	"github.com/andremartinsds/go_admin/internal/mappers"

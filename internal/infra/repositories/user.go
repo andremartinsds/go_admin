@@ -2,8 +2,9 @@ package repositories
 
 import (
 	"errors"
-	"github.com/andremartinsds/go_admin/internal/entities"
 	"time"
+
+	"github.com/andremartinsds/go_admin/internal/entities"
 
 	"github.com/andremartinsds/go_admin/internal/infra/db/models"
 	"github.com/andremartinsds/go_admin/internal/mappers"
@@ -53,9 +54,10 @@ func (u *UserRepository) UserExists(param map[string]string) error {
 func (u *UserRepository) Create(user *entities.User) error {
 	enderecoId := pkg.NewUUID()
 
-	u.db.Transaction(func(tx *gorm.DB) error {
+	err := u.db.Transaction(func(tx *gorm.DB) error {
 
 		if err := tx.Save(&models.AddressModel{
+			ID:                 enderecoId,
 			ZipCode:            user.Address.ZipCode,
 			State:              user.Address.State,
 			City:               user.Address.City,
@@ -80,6 +82,7 @@ func (u *UserRepository) Create(user *entities.User) error {
 			Document:  user.Document,
 			AccountID: user.AccountID,
 			SellerID:  user.SellerID,
+			RoleID:    user.RoleID,
 			AddressID: enderecoId,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -88,6 +91,9 @@ func (u *UserRepository) Create(user *entities.User) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

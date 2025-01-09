@@ -20,6 +20,7 @@ type User struct {
 	DateOfBirth time.Time // Date of birth of the user
 	Provider    *bool     // Indicates if the user is a provider
 	SellerID    pkg.ID    // Identifier for the seller associated with the user
+	RoleID      pkg.ID    // Identifier for the seller associated with the user
 	AccountID   pkg.ID    // Identifier for the account associated with the user
 	CreatedAt   time.Time // Timestamp for when the user was created
 	UpdatedAt   time.Time // Timestamp for when the user was last updated
@@ -81,6 +82,7 @@ func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 	// Parse SellerID and AccountID from strings to IDs
 	SellerID, _ := pkg.StringToUUID(userInputDTO.SellerID)
 	accountID, _ := pkg.StringToUUID(userInputDTO.AccountID)
+	roleID, _ := pkg.StringToUUID(userInputDTO.RoleID)
 
 	// Initialize a new User instance
 	user := User{
@@ -92,6 +94,7 @@ func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 		Provider:  &userInputDTO.Provider,
 		Password:  userInputDTO.Password,
 		SellerID:  SellerID,
+		RoleID:    roleID,
 		AccountID: accountID,
 		Address:   addressEntity,
 	}

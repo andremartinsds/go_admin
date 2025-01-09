@@ -8,6 +8,21 @@ import (
 )
 
 func FromUserToUserOutputCreateDTO(user *entities.User) *dto.UserOutputCreateDTO {
+	var address dto.AddressInputCreateDTO
+	if user.Address.ZipCode != "" {
+		address = dto.AddressInputCreateDTO{
+			ZipCode:        user.Address.ZipCode,
+			Description:    user.Address.Description,
+			State:          user.Address.State,
+			City:           user.Address.City,
+			Street:         user.Address.Description,
+			Number:         user.Address.Number,
+			Complement:     user.Address.Complement,
+			Neighborhood:   user.Address.Neighborhood,
+			ReferencePoint: user.Address.ReferencePoint,
+			Observation:    user.Address.Observation,
+		}
+	}
 	return &dto.UserOutputCreateDTO{
 		Name:      user.Name,
 		Phone:     user.Phone,
@@ -16,6 +31,7 @@ func FromUserToUserOutputCreateDTO(user *entities.User) *dto.UserOutputCreateDTO
 		Provider:  *user.Provider,
 		SellerID:  user.SellerID.String(),
 		AccountID: user.AccountID.String(),
+		Address:   address,
 	}
 }
 

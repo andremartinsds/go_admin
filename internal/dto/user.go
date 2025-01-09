@@ -32,6 +32,9 @@ type UserInputCreateDTO struct {
 	// SellerID is the unique identifier of the associated seller.
 	SellerID string `json:"sellerId"`
 
+	// RoleID is the unique identifier of the associated role.
+	RoleID string `json:"roleId"`
+
 	// AccountID is the unique identifier of the associated account.
 	AccountID string `json:"accountId"`
 

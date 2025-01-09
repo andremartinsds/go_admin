@@ -3,8 +3,9 @@ package repositories
 import (
 	"errors"
 	"fmt"
-	"github.com/andremartinsds/go_admin/internal/entities"
 	"time"
+
+	"github.com/andremartinsds/go_admin/internal/entities"
 
 	"github.com/andremartinsds/go_admin/internal/infra/db/models"
 	"github.com/andremartinsds/go_admin/internal/mappers"
