@@ -17,7 +17,7 @@ type UserContract interface {
 	Create(account *entities.User) error
 	UserExists(param map[string]string) error
 	SelectOneById(id string) (*entities.User, error)
-	Login(username, password string) (*entities.User, error)
+	FindUserByUsername(username, password string) (*entities.User, error)
 }
 
 type UserRepository struct {
@@ -28,9 +28,9 @@ func UserRepositoryInstancy(connection *gorm.DB) *UserRepository {
 	return &UserRepository{db: connection}
 }
 
-func (u *UserRepository) Login(username, password string) (*entities.User, error) {
+func (u *UserRepository) FindUserByUsername(username, password string) (*entities.User, error) {
 	var userModel models.UserModel
-	err := u.db.Where("username = ?", username).Where("password =?", password).First(&userModel)
+	err := u.db.Where("email = ?", username).Preload("Address").First(&userModel).Error
 	if err != nil {
 		return nil, errors.New("the username " + username + " or password " + password + " are incorrect")
 	}
@@ -80,6 +80,7 @@ func (u *UserRepository) Create(user *entities.User) error {
 			Provider:  *user.Provider,
 			Password:  user.Password,
 			Document:  user.Document,
+			BirthDate: user.DateOfBirth,
 			AccountID: user.AccountID,
 			SellerID:  user.SellerID,
 			RoleID:    user.RoleID,

@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/andremartinsds/go_admin/internal/auth"
 	"github.com/andremartinsds/go_admin/internal/infra/repositories"
 	"github.com/andremartinsds/go_admin/pkg"
-	"net/http"
 )
 
 // LoginHandler handles HTTP requests related to user accounts.
@@ -24,31 +25,31 @@ func LoginHandlerInstance(userRepository repositories.UserContract) *LoginHandle
 func (a *LoginHandler) Login(w http.ResponseWriter, r *http.Request) {
 	pkg.DefaultHeaders(w)
 
-	accountID := r.Header.Get("accountID")
-	sellerID := r.Header.Get("sellerID")
-
-	if !pkg.ValidUUID(accountID) || (sellerID != "" && !pkg.ValidUUID(sellerID)) {
-		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "unauthorized", StatusCode: http.StatusUnauthorized})
-		return
-	}
-
 	JwtAuth, _ := auth.JWT(r)
 	var inputDTO struct {
-		username string
-		password string
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&inputDTO)
 	if err != nil {
 		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
 		return
 	}
-	userEntity, err := a.repository.Login(inputDTO.username, inputDTO.password)
+	userEntity, err := a.repository.FindUserByUsername(inputDTO.Username, inputDTO.Password)
 	if err != nil {
-		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusBadRequest})
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: err.Error(), StatusCode: http.StatusUnauthorized})
 		return
 	}
+	if !userEntity.ValidatePassword(inputDTO.Password) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "invalid username or password", StatusCode: http.StatusUnauthorized})
+		return
+	}
+
+	userID := pkg.UUIDToString(userEntity.ID)
 	_, tokenString, _ := JwtAuth.Encode(map[string]interface{}{
-		"sub": userEntity.ID,
+		"sub":       userID,
+		"accountID": userEntity.AccountID,
+		"sellerID":  userEntity.SellerID,
 	})
 
 	accessToken := struct {

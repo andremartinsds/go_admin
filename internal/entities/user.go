@@ -7,6 +7,7 @@ import (
 
 	"github.com/andremartinsds/go_admin/internal/dto"
 	"github.com/andremartinsds/go_admin/pkg"
+	"github.com/andremartinsds/go_admin/pkg/auth"
 )
 
 // User represents a user entity with relevant fields.
@@ -64,11 +65,13 @@ func (a *User) validateToCreate() error {
 }
 
 // ValidatePassword checks if the provided password and password confirmation match.
-func (a *User) ValidatePassword(userDto dto.UserInputCreateDTO) error {
-	if userDto.Password != userDto.PasswordConfirmation {
-		return errors.New("the passwords don't match")
-	}
-	return nil
+func (a *User) ValidatePassword(requestPass string) bool {
+	return auth.IsValidPassword(a.Password, requestPass)
+}
+
+func (a *User) HandleBirthDate(date string) {
+	time, _ := time.Parse(time.RFC3339, date)
+	a.DateOfBirth = time.UTC()
 }
 
 // CreateUser initializes a new User based on the provided input DTO.
@@ -84,20 +87,27 @@ func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 	accountID, _ := pkg.StringToUUID(userInputDTO.AccountID)
 	roleID, _ := pkg.StringToUUID(userInputDTO.RoleID)
 
+	passwordEncripted, err := auth.Encrypt(userInputDTO.Password)
+	if err != nil {
+		return nil, errors.New("we have a problemn to ecript password")
+	}
+
 	// Initialize a new User instance
 	user := User{
-		ID:        pkg.NewUUID(), // Generate a new unique identifier
+		ID:        pkg.NewUUID(),
 		Name:      userInputDTO.Name,
 		Phone:     userInputDTO.Phone,
 		Email:     userInputDTO.Email,
 		Document:  userInputDTO.Document,
 		Provider:  &userInputDTO.Provider,
-		Password:  userInputDTO.Password,
+		Password:  passwordEncripted,
 		SellerID:  SellerID,
 		RoleID:    roleID,
 		AccountID: accountID,
 		Address:   addressEntity,
 	}
+
+	user.HandleBirthDate(userInputDTO.BirthDate)
 
 	// Validate the user before creation
 	err = user.validateToCreate()
@@ -106,7 +116,6 @@ func CreateUser(userInputDTO dto.UserInputCreateDTO) (*User, error) {
 	}
 
 	// Validate the password confirmation
-	err = user.ValidatePassword(userInputDTO)
 	if err != nil {
 		return nil, err
 	}

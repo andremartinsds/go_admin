@@ -89,6 +89,39 @@ func (a *UserHandler) SelectUser(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "userId")
 	w.Header().Set("Content-type", "application/json")
 
+	if !pkg.ValidUUID(userId) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "userId invalid", StatusCode: http.StatusBadRequest})
+		return
+	}
+	accountID := r.Header.Get("accountID")
+	sellerID := r.Header.Get("sellerID")
+
+	if !pkg.ValidUUID(accountID) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "accountId invalid", StatusCode: http.StatusBadRequest})
+		return
+	}
+
+	if !pkg.ValidUUID(sellerID) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "seller invalid", StatusCode: http.StatusBadRequest})
+		return
+	}
+
+	accountEntity, _ := a.accountRepository.SelectOneById(accountID)
+	if lo.IsEmpty(accountEntity.Document) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "account does not found", StatusCode: http.StatusNotFound})
+		return
+	}
+	sellerEntity, _ := a.sellerRepository.SelectOneById(sellerID)
+	if lo.IsEmpty(sellerEntity.Document) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "seller does not found", StatusCode: http.StatusNotFound})
+		return
+	}
+
+	if !sellerEntity.IsAccountIDEqual(accountID) {
+		pkg.ErrorResponse(pkg.InternalError{ResponseWriter: w, Message: "account or seller does not valid", StatusCode: http.StatusNotFound})
+		return
+	}
+
 	user, err := a.userRepository.SelectOneById(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)

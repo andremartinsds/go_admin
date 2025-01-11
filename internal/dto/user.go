@@ -18,7 +18,7 @@ type UserInputCreateDTO struct {
 	Document string `json:"document"`
 
 	// BirthDate is the user's date of birth.
-	BirthDate time.Time `json:"birthDate"`
+	BirthDate string `json:"birthDate"`
 
 	// Provider indicates whether the user is a service provider.
 	Provider bool `json:"provider"`

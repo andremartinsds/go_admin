@@ -15,7 +15,7 @@ type UserModel struct {
 	Email     string       `gorm:"type:varchar(100);not null"`
 	Password  string       `gorm:"type:varchar(255);not null"`
 	Document  string       `gorm:"type:varchar(20);not null"`
-	BirthDate time.Time    `gorm:"type:varchar(20);default null"`
+	BirthDate time.Time    `gorm:"default null"`
 	Provider  bool         `gorm:"not null"`
 	SellerID  uuid.UUID    `gorm:"type:char(36);not null"`
 	Seller    SellerModel  `gorm:"foreignKey:SellerID"`
